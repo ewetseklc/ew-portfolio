@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 serve(async (req) => {
@@ -31,15 +31,18 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `You are an actuarial claims triage AI. Given a claim description, analyze it and return a JSON response using the suggest_triage tool. Consider:
+            content: `You are an Actuarial Claims Specialist. Analyze the user's damage description and return a triage assessment using the suggest_triage tool.
+
+Assign a Severity Score from 1-10 based on:
 - Severity of damage/loss described
 - Number of affected areas/items
 - Complexity of the claim
-- Historical patterns for similar claims
 - Potential for escalation
 
-Severity scale: 1-3 (Low), 4-6 (Medium), 7-10 (High/Critical)
-Reserve amounts should reflect realistic actuarial estimates in USD.`,
+Calculate the Initial Case Reserve using this formula: 500 * (severity_score ^ 2.2).
+Round the reserve to the nearest dollar.
+
+Provide a 2-sentence actuarial justification explaining the severity assignment and reserve rationale.`,
           },
           { role: "user", content: claim_text },
         ],
@@ -53,9 +56,9 @@ Reserve amounts should reflect realistic actuarial estimates in USD.`,
                 type: "object",
                 properties: {
                   severity_score: { type: "number", description: "Severity score from 1-10" },
-                  reserve_amount: { type: "number", description: "Suggested reserve amount in USD" },
+                  reserve_amount: { type: "number", description: "Initial case reserve in USD calculated as 500 * (severity_score ^ 2.2)" },
                   risk_category: { type: "string", description: "Risk category (e.g., Property Damage, Bodily Injury, Liability)" },
-                  reasoning: { type: "string", description: "Brief actuarial reasoning for the assessment" },
+                  reasoning: { type: "string", description: "2-sentence actuarial justification" },
                 },
                 required: ["severity_score", "reserve_amount", "risk_category", "reasoning"],
                 additionalProperties: false,
@@ -69,13 +72,13 @@ Reserve amounts should reflect realistic actuarial estimates in USD.`,
 
     if (!response.ok) {
       if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limit exceeded" }), {
+        return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
           status: 429,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Payment required" }), {
+        return new Response(JSON.stringify({ error: "Service temporarily unavailable. Please try again later." }), {
           status: 402,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -91,7 +94,16 @@ Reserve amounts should reflect realistic actuarial estimates in USD.`,
 
     const result = JSON.parse(toolCall.function.arguments);
 
-    return new Response(JSON.stringify(result), {
+    // Enforce the formula server-side as a safeguard
+    const score = Math.max(1, Math.min(10, Math.round(result.severity_score)));
+    const calculatedReserve = Math.round(500 * Math.pow(score, 2.2));
+
+    return new Response(JSON.stringify({
+      severity_score: score,
+      reserve_amount: calculatedReserve,
+      risk_category: result.risk_category,
+      reasoning: result.reasoning,
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {

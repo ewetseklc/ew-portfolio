@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Brain, Loader2, AlertTriangle, DollarSign, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const DEMO_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/claims-triage`;
 
@@ -98,8 +99,25 @@ const ClaimsDemo = () => {
         </motion.p>
       )}
 
+      {/* Skeleton loader */}
+      {loading && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-6 glass rounded-xl p-5 neon-glow space-y-4"
+        >
+          <Skeleton className="h-4 w-32 bg-muted/60" />
+          <div className="grid grid-cols-2 gap-4">
+            <Skeleton className="h-20 rounded-lg bg-muted/60" />
+            <Skeleton className="h-20 rounded-lg bg-muted/60" />
+          </div>
+          <Skeleton className="h-14 rounded-lg bg-muted/60" />
+          <Skeleton className="h-20 rounded-lg bg-muted/60" />
+        </motion.div>
+      )}
+
       <AnimatePresence>
-        {result && (
+        {result && !loading && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -115,7 +133,7 @@ const ClaimsDemo = () => {
                 </p>
               </div>
               <div className="glass rounded-lg p-3 text-center">
-                <p className="text-xs text-muted-foreground mb-1">Suggested Reserve</p>
+                <p className="text-xs text-muted-foreground mb-1">Initial Case Reserve</p>
                 <p className="text-2xl font-display font-bold text-secondary flex items-center justify-center">
                   <DollarSign size={18} />
                   {result.reserve_amount.toLocaleString()}
@@ -127,7 +145,7 @@ const ClaimsDemo = () => {
               <p className="text-sm font-semibold">{result.risk_category}</p>
             </div>
             <div className="glass rounded-lg p-3">
-              <p className="text-xs text-muted-foreground mb-1">Reasoning</p>
+              <p className="text-xs text-muted-foreground mb-1">Actuarial Justification</p>
               <p className="text-sm text-foreground/80 leading-relaxed">{result.reasoning}</p>
             </div>
           </motion.div>
