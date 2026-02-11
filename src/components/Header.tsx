@@ -35,7 +35,7 @@ const Header = () => {
           {navItems.map(item => <Link key={item.path} to={item.path} className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${location.pathname === item.path ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground hover:bg-muted"}`}>
               {item.label}
             </Link>)}
-          <a href="https://yeahrzdymrfmweezksjr.supabase.co/storage/v1/object/public/resume//Ewetse_Chisenga_Resume_2026" target="_blank" rel="noopener noreferrer" className="ml-2 px-4 py-2 rounded-lg text-sm font-medium gradient-bg text-primary-foreground flex items-center gap-2 neon-glow hover:opacity-90 transition-opacity">
+          <a href="https://yeahrzdymrfmweezksjr.supabase.co/storage/v1/object/public/resume/Ewetse_Chisenga_Resume_2026.pdf" target="_blank" rel="noopener noreferrer" className="ml-2 px-4 py-2 rounded-lg text-sm font-medium gradient-bg text-primary-foreground flex items-center gap-2 neon-glow hover:opacity-90 transition-opacity">
             <FileText size={14} />
             Resume
           </a>
@@ -63,7 +63,7 @@ const Header = () => {
               {navItems.map(item => <Link key={item.path} to={item.path} onClick={() => setMobileOpen(false)} className={`px-4 py-3 rounded-lg text-sm font-medium transition-colors ${location.pathname === item.path ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground"}`}>
                   {item.label}
                 </Link>)}
-              <a href="https://yeahrzdymrfmweezksjr.supabase.co/storage/v1/object/public/resume//Ewetse_Chisenga_Resume_2026" target="_blank" rel="noopener noreferrer" className="px-4 py-3 rounded-lg text-sm font-medium gradient-bg text-primary-foreground flex items-center gap-2 mt-2">
+              <a href="https://yeahrzdymrfmweezksjr.supabase.co/storage/v1/object/public/resume/Ewetse_Chisenga_Resume_2026.pdf" target="_blank" rel="noopener noreferrer" className="px-4 py-3 rounded-lg text-sm font-medium gradient-bg text-primary-foreground flex items-center gap-2 mt-2">
                 <FileText size={14} />
                 Resume
               </a>
